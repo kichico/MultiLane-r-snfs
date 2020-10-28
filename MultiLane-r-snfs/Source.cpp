@@ -2,7 +2,7 @@
 
 int main() {
 	Basic_Traffic basic_traffic;
-	for (int c = 0; c <= 10; c++) {
+	/*for (int c = 0; c <= 10; c++) {
 		double C = c * 0.1;
 		double D = 1.0 - C;
 		for (int number_of_cars = 1; number_of_cars <= 500; number_of_cars += 1) {
@@ -11,4 +11,6 @@ int main() {
 			std::cout << " rho: " << rho << " q: " << basic_traffic.q << std::endl << std::endl;
 		}
 	}
+	*/
+
 }
