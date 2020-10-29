@@ -1,7 +1,30 @@
 #include "Basic_Traffic.h"
 #include <string>
 #include <iostream>
+#include <fstream>
 
+void Basic_Traffic::_calculation(int number_of_cars, double C_, double D_) {
+	N = number_of_cars;
+	C = C_;
+	D = D_;
+	q = 0;
+	for (int n = 0; n < constant.ensemble; n++) {
+		double _q = 0;
+		initialize();
+		for (int i = 0; i < constant.run_up_steps; i++) {
+			//if ((i + 1) % 1000 == 0) std::cout << i + 1 << std::endl;
+			_proceed();
+		}
+		for (int i = 0; i < constant.mesurement_steps; i++) {
+			_proceed();
+			_q += information.q;
+		}
+		std::cout << "n: " << n + 1 << " car: " << number_of_cars << " C: " << C << " D: " << D << " q: " << _q / double(constant.mesurement_steps);
+		std::cout << " left: " << double(information.turn_left) / double(10000 + constant.mesurement_steps) << " right: " << double(information.turn_right) / double(10000 + constant.mesurement_steps) << std::endl;
+		q += _q / double(constant.mesurement_steps);
+	}
+	q /= double(constant.ensemble);
+}
 
 void Basic_Traffic::_proceed() {
 	/*—¬‚ê
@@ -35,7 +58,7 @@ void Basic_Traffic::_proceed() {
 	//getchar();
 }
 
-void Basic_Traffic::_calculation_neglect_C_and_D() {
+void Basic_Traffic::_calculation_neglect_C_and_D(double C_,double D_) {
 	for (int i = 5; i < 95; i += 5) {
 		double global_rho = i / 100.0;
 		N = int(global_rho * constant.lane_length);

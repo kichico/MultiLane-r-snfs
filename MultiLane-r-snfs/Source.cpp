@@ -2,7 +2,9 @@
 
 int main() {
 	Basic_Traffic basic_traffic;
-	basic_traffic._calculation_neglect_C_and_D();
+	double C_ = 1.0;
+	double D_ = 0.0;
+	basic_traffic._calculation_neglect_C_and_D(C_, D_);
 	return 0;
 	/*for (int c = 0; c <= 10; c++) {
 		double C = c * 0.1;

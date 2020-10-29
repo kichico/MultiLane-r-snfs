@@ -17,4 +17,5 @@ private:
 	void _rule3(int ID);
 	void _rule4(int ID);
 };
+
 #endif // !BASIC_TRAFFIC_DECIDE?VELOCITY_H

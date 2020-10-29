@@ -22,4 +22,5 @@ private:
 	void _check_velocity(int ID, int _v, std::vector<int>* check_position, int next_position, bool clash);
 };
 
+
 #endif // !BASIC_TRAFFIC_UPDATE_POSITION_H

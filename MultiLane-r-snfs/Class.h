@@ -8,11 +8,11 @@
 #pragma region 計算条件
 struct Constant_Information {
 #pragma region 共通定数
-	const int ensemble = 50;			//アンサンブル数
-	const int run_up_steps = 1800;		//助走期間のステップ数
-	const int mesurement_steps = 300;	//計測期間のステップ数
-	const int lane_length = 300;		//レーンの長さ
-	const int number_of_lanes = 1;		//レーン数
+	const int ensemble = 5;			//アンサンブル数
+	const int run_up_steps = 3000;		//助走期間のステップ数
+	const int mesurement_steps = 100;	//計測期間のステップ数
+	const int lane_length = 500;		//レーンの長さ
+	const int number_of_lanes = 2;		//レーン数
 	const int Vmax = 5;					//最大速度
 #pragma endregion
 #pragma region Resived-S-NFSモデル用定数
@@ -176,13 +176,6 @@ private:
 		number_of_cars = std::vector<int>(number_of_lane, 0);
 	}
 };
-
-
-
-
-
-
-
 
 #endif // !BASIC_TRAFFIC_CLASS_H
 
