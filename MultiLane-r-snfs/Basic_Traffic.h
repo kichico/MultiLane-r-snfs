@@ -3,13 +3,28 @@
 #include "Update_Position.h"
 #include <fstream>
 
-class Basic_Traffic:public Update_Position {
+class Basic_Traffic : public Update_Position {
+	/*
+		モデル全体を司るクラス
+		全てのクラスを継承している
+	*/
+public:
+	double q;	//流量
+	double rho;	//密度
+	//void calculation(int number_of_cars, double C, double D) { _calculation(number_of_cars, C, D); }	//モデルの計算
+	void _calculation_neglect_C_and_D();
+private:
+	void _calculation(int number_of_cars, double C, double D);	//実装
+	void _proceed();
+};
+
+/*class Basic_Traffic:public Update_Position {
 private:
 	void _proceed();
-	void _calculation_neglect_C_and_D();
 public:
-	void master_process();
+	void _calculation_neglect_C_and_D();
 };
+*/
 /*
 void Basic_Traffic::_calculation(int number_of_cars, double C_, double D_) {
 	N = number_of_cars;

@@ -9,10 +9,10 @@
 struct Constant_Information {
 #pragma region 共通定数
 	const int ensemble = 50;			//アンサンブル数
-	const int run_up_steps = 3000;		//助走期間のステップ数
-	const int mesurement_steps = 100;	//計測期間のステップ数
-	const int lane_length = 500;		//レーンの長さ
-	const int number_of_lanes = 2;		//レーン数
+	const int run_up_steps = 1800;		//助走期間のステップ数
+	const int mesurement_steps = 300;	//計測期間のステップ数
+	const int lane_length = 300;		//レーンの長さ
+	const int number_of_lanes = 1;		//レーン数
 	const int Vmax = 5;					//最大速度
 #pragma endregion
 #pragma region Resived-S-NFSモデル用定数
@@ -123,6 +123,7 @@ public:
 	int turn_left;						//左レーンに移動した車両数
 	int turn_right;						//右レーンに移動した車両数
 	void initialize_information(int number_of_lanes) { _initialize_information(number_of_lanes); }	//inofrmation関係の情報をまとめて初期化する
+	int elapsedtime;
 private:
 	void _initialize_information(int number_of_lanes) {
 		//initialize_informationの実装
@@ -176,148 +177,12 @@ private:
 	}
 };
 
-class Initialize {
-/*
-	基底クラス
-	このクラスを継承して，モデルを組んでいく
-*/
-public:
-	struct Lead_Car_ID {
-		//各レーンの先頭車両情報を格納する
-		//先頭車両の定義は，最も前方車両との距離がある車両である
-		bool existence;
-		int ID;
-		int maximum_gap;
-	};
 
-	Car car;
-	Information information;
-	Map_Information map_information;
-	Constant_Information constant;	//計算条件の定数や変数
-	int N;		//車両数
-	double C;	//C戦略車両数
-	double D;	//D戦略車両数
-	std::vector<Lead_Car_ID> lead_car_ID;	//lead_car_ID[レーン番号] = そのレーンの先頭車両のID
-	void initialize() { _initialize(); }	//モデルの初期化
 
-	//以下は，理論と実装に間違いがなければ必要ないパート
-	void CHECK(std::vector<std::vector<int>>& ID, std::vector<std::vector<bool>>& existence) { _CHECK(ID, existence); }
-private:
-	void _initialize();	//モデルの初期化の実装
-	//↓以下に実装のUnitになる関数の列挙
-	void _initialize_cars_strategy();
-	void _initialize_cars_position();
-	void _initial_search();
 
-	void _CHECK(std::vector<std::vector<int>>& map, std::vector<std::vector<bool>>& existence);
-};
 
-class Decide_Velocity : public Initialize {
-/*
-	一つ目の継承クラス
-	このクラスは，Rule1からRule4に沿って，次ステップの候補速度を求める
-*/
-public:
-	void apply_rules_1_to_4() { _apply_rules_1_to_4(); }	//ルール1から4を各車両に適用
-private:
-	void _apply_rules_1_to_4();	//ルール適用の実装
-	//↓以下に実装のUnitになる関数の列挙
-	void _rule1(int ID);
-	void _rule2(int ID);
-	void _rule3(int ID);
-	void _rule4(int ID);
-};
 
-class Lane_Change : public Decide_Velocity {
-/*
-	二つ目の継承クラス
-	このクラスは，Rule4適用時の速度において，ウインカーを出させるパート，
-	実際に車線変更を行うパートの二つのパートで構成されており，
-	車線変更全般を司る
-*/
-#pragma region 周りの車両情報
-	struct Side {
-		//焦点車両ID周りの情報を格納する
-		int ID;
-		int distance;
-	};
-	struct Side_Information {
-		//上記の構造体を前方と後方で実装する
-		Side front_side;
-		Side rear_side;
-	};
-#pragma endregion
-	struct Winker {
-		bool left;
-		bool right;
-	};
 
-	struct Canditate {
-		int ID;
-		Side_Information side_information;
-		Winker winker;
-	};
-
-public:
-	void try_lane_change() { _try_lane_change(); }	//ウインカーを出させる
-	bool lane_change() { return _lane_change(); }		//実際に車線変更を行う
-	std::vector<bool> still_room_for_movement;	//まだ動ける最大移動距離に対し，空間があるかどうか
-	std::vector<int> canditate_velocity;	//最終的な速度の候補値（例えば，衝突を回避するために減速すると，その車両の速度はv4よりは遅くなる）
-private:
-	std::vector<Canditate> canditate_lane_change;	//車線変更を行う車のリスト
-	void _try_lane_change(); //実際に車線変更を行うパートの実装
-	//↓以下に実装のUnitになる関数の列挙
-/*
-	//流れ							//実装
-	//1. インセンティブチェック		//インセンティブチェック
-	//2. ウインカーを出させる		//ウインカーを出させる
-									//車線変更なしで一旦位置更新
-	//3. 安全確認					
-	//4. 車線変更					//安全確認，車線変更
-*/
-	int _decide_top_car();		//車線変更を行う先頭車両を全レーンから1台選ぶ
-	void _create_canditate_of_lane_change(int leader);	//車線変更を行うD戦略車両を先頭車両から順に抜き出し，リストを作る
-	void _check_insentive(int canditate_num, int signal);	//インセンティブチェック
-	void _get_side_information(int canditate_num, int signal);	//車両番号ID周りの情報を取得する
-	void _decide_which_signal(int canditate_num);	//左右どちらのウインカーを出すか決定する
-	bool _lane_change();	//安全確認を行った後，車線変更を行う
-	void _search_around(int lane_number, int position);
-};
-
-class Update_Position : public Lane_Change {
-/*
-	三つ目の継承クラス
-	このクラスは，各車両の位置を速度に従って更新する
-	この際，各レーンの流量が最大になるように位置を更新する
-*/
-public:
-	void update_position() { _update_position(); }	//車両位置を更新する
-private:
-	std::vector<Lead_Car_ID> LCI;		//LCI[レーン番号]次ステップの先頭車両候補
-	void _update_position();				//車両位置更新の実装
-	//↓以下に実装のUnitになる関数の列挙
-	bool _update_position_front_to_back(int lane_number);	//先頭車両から順に位置を更新する
-	void _move_forward_car(int lane_number, int ID);		//上記関数の詳細な中身
-
-	//↓以下，エラーチェック．理論と実装に間違いがなければ必要ないパート
-	void _check_clash(int ID, int lane_number, int next_position, bool clash);
-	void _check_velocity(int ID, int _v, std::vector<int>* check_position, int next_position, bool clash);
-};
-
-class Basic_Traffic : public Update_Position {
-/*
-	モデル全体を司るクラス
-	全てのクラスを継承している
-*/
-public:
-	double q;	//流量
-	double rho;	//密度
-	void calculation(int number_of_cars, double C, double D) { _calculation(number_of_cars, C, D); }	//モデルの計算
-	void _calculation_neglect_C_and_D();
-private:
-	void _calculation(int number_of_cars, double C, double D);	//実装
-	void _proceed();
-};
 
 #endif // !BASIC_TRAFFIC_CLASS_H
 

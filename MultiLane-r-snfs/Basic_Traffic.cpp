@@ -1,8 +1,7 @@
 #include "Basic_Traffic.h"
+#include <string>
+#include <iostream>
 
-void Basic_Traffic::master_process() {
-
-}
 
 void Basic_Traffic::_proceed() {
 	/*—¬‚ê
@@ -31,25 +30,47 @@ void Basic_Traffic::_proceed() {
 	map_information.map.existence.current = map_information.update_position.existence;
 	map_information.map.ID.current = map_information.update_position.ID;
 	information.q = double(N) / (double(constant.number_of_lanes) * double(constant.lane_length)) * double(information.sum_velocity) / double(N);
+	information.elapsedtime++;
 	//CHECK(map_information.map.ID.current, map_information.map.existence.current);
 	//getchar();
 }
 
 void Basic_Traffic::_calculation_neglect_C_and_D() {
-	for (int n = 0; n < constant.ensemble; n++) {
-		double _q = 0;
-		initialize();
-		for (int i = 0; i < constant.run_up_steps; i++) {
-			_proceed();
+	for (int i = 5; i < 95; i += 5) {
+		double global_rho = i / 100.0;
+		N = int(global_rho * constant.lane_length);
+		//if (double(N) != global_rho * Map.Length) global_rho = car.constants.N / Map.Length;
+		std::string Filename1 = "C:/Users/sueki/source/repos/Result/singlelane_r-nfs_tanaka_";
+		std::string Filename2 = "C:/Users/sueki/source/repos/Result/singlelane_r-nfs_tanimoto_";
+		std::string Filename3 = "C:/Users/sueki/source/repos/Result/Position_time_fixedVmax_1800idle.csv";
+		std::ofstream ofsAV1(Filename1, std::ios::app);
+		std::ofstream ofsAV2(Filename2, std::ios::app);
+		std::ofstream ofsPT(Filename3, std::ios::app);
+		ofsAV1 << "Q,k" << std::endl;
+		ofsAV2 << "Q,k," << std::endl;
+		ofsPT << "elapsedtime,position" << std::endl;
+		std::cout << "Q => k" << std::endl;
+		for (int n = 0; n < 1/*constant.ensemble*/; n++) {
+			double _q = 0;
+			initialize();
+			information.elapsedtime = 0;
+			for (int i = 0; i < constant.run_up_steps; i++) {
+				_proceed();
+			}
+			for (int i = 0; i < constant.mesurement_steps; i++) {
+				_proceed();
+				_q += information.q;
+				for (int j = 0; j < N; j++) {
+					ofsPT << information.elapsedtime << "," << car.position.current[j] << std::endl;
+				}
+			}
+				//std::cout << "n: " << n + 1 << " car: " << number_of_cars << " C: " << C << " D: " << D << " q: " << _q / double(constant.mesurement_steps);
+				//std::cout << " left: " << double(information.turn_left) / double(10000 + constant.mesurement_steps) << " right: " << double(information.turn_right) / double(10000 + constant.mesurement_steps) << std::endl;
+				//q += _q / double(constant.mesurement_steps);
 		}
-		for (int i = 0; i < constant.mesurement_steps; i++) {
-			_proceed();
-			_q += information.q;
-		}
-		std::cout<<
-		//std::cout << "n: " << n + 1 << " car: " << number_of_cars << " C: " << C << " D: " << D << " q: " << _q / double(constant.mesurement_steps);
-		//std::cout << " left: " << double(information.turn_left) / double(10000 + constant.mesurement_steps) << " right: " << double(information.turn_right) / double(10000 + constant.mesurement_steps) << std::endl;
-		//q += _q / double(constant.mesurement_steps);
+		//q /= double(constant.ensemble);
+		ofsAV1.close();
+		ofsAV2.close();
+		ofsPT.close();
 	}
-	//q /= double(constant.ensemble);
 }

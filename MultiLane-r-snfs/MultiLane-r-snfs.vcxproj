@@ -151,7 +151,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Basic_Traffic.cpp" />
+    <ClCompile Include="Decide_Velocity.cpp" />
+    <ClCompile Include="Initialize.cpp" />
+    <ClCompile Include="Lane_Change.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Update_Position.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
